@@ -1,4 +1,4 @@
-import { useRoute } from "vue-router";
+
 
 export function getBaseId() {
 	try {
@@ -14,14 +14,4 @@ export function getBaseId() {
 		return "";
 	}
 	return "";
-}
-
-export function useSyParams() {
-	const route = useRoute();
-
-	const id = String(route.query.baseid) ?? "";
-
-	return {
-		id,
-	};
 }
