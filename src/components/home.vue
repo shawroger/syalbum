@@ -91,8 +91,6 @@ const formatTooltip = (val: number) => {
 	align-items: center;
 	width: 100vw;
 	padding-bottom: 5px;
-	border-bottom: solid 1px grey;
-	margin-bottom: 15px;
 }
 
 .image-list .header .title {
