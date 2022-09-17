@@ -1,6 +1,6 @@
 <template>
 	<div class="image-list">
-		<div class="header">
+		<div class="header" v-if="showHeaderDiv">
 			<div class="title">{{ albumConfig.title }}</div>
 
 			<div class="date">{{ joinDate(albumConfig.date) }}</div>
@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { useSyParams } from "../utils/query";
+import { getBaseId } from "../utils/query";
 import { joinRoot, joinDate } from "../utils/path";
 import {
 	getBlockAttrs,
@@ -32,11 +32,12 @@ import {
 } from "../utils/fetch";
 
 const index = ref(0);
+
+const id = getBaseId();
 const albumFile = ref("");
-const params = useSyParams();
 const albumConfig = ref(defaultAlbumConfig());
 const totalImages = computed(() => albumConfig.value?.images?.length ?? 0);
-
+const showHeaderDiv = ref(true);
 const currentFile = computed(() => {
 	if (0 <= index.value && index.value < totalImages.value) {
 		const image = albumConfig.value.images[index.value];
@@ -58,13 +59,20 @@ const formatTooltip = (val: number) => {
 };
 
 (async () => {
-	const { data } = await getBlockAttrs(params.id);
-	const file = data["custom-album-file"];
-	if (file && file.endsWith(".json")) {
-		albumFile.value = file;
+	if (id.length > 1) {
+		const { data } = await getBlockAttrs(id);
+		const file = data["custom-album-file"];
+		const showTitle = data["custom-album-show-header"];
+		
+		if(String(showTitle) === "none") {
+			showHeaderDiv.value = false;
+		}
+		
+		if (file && file.endsWith(".json")) {
+			albumFile.value = file;
+			albumConfig.value = await getAlbumConf(albumFile.value);
+		}
 	}
-
-	albumConfig.value = await getAlbumConf(albumFile.value);
 })();
 </script>
 

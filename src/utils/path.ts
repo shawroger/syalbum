@@ -22,3 +22,5 @@ export function joinDate(date: string[]) {
 
 	return date[0] + " ~ " + date[1];
 }
+
+
