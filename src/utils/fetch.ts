@@ -9,7 +9,6 @@ export interface SyAttrs {
 		type: string;
 		updated: string;
 		"custom-album-file": string;
-		"custom-album-show-header": string;
 	};
 }
 

@@ -1,6 +1,6 @@
 <template>
 	<div class="image-list">
-		<div class="header" v-if="showHeaderDiv">
+		<div class="header" v-if="albumConfig.title.length > 0">
 			<div class="title">{{ albumConfig.title }}</div>
 
 			<div class="date">{{ joinDate(albumConfig.date) }}</div>
@@ -37,7 +37,6 @@ const id = getBaseId();
 const albumFile = ref("");
 const albumConfig = ref(defaultAlbumConfig());
 const totalImages = computed(() => albumConfig.value?.images?.length ?? 0);
-const showHeaderDiv = ref(true);
 const currentFile = computed(() => {
 	if (0 <= index.value && index.value < totalImages.value) {
 		const image = albumConfig.value.images[index.value];
@@ -62,12 +61,7 @@ const formatTooltip = (val: number) => {
 	if (id.length > 1) {
 		const { data } = await getBlockAttrs(id);
 		const file = data["custom-album-file"];
-		const showTitle = data["custom-album-show-header"];
-		
-		if(String(showTitle) === "none") {
-			showHeaderDiv.value = false;
-		}
-		
+
 		if (file && file.endsWith(".json")) {
 			albumFile.value = file;
 			albumConfig.value = await getAlbumConf(albumFile.value);
@@ -119,7 +113,7 @@ const formatTooltip = (val: number) => {
 	align-items: center;
 }
 .image-list img {
-	max-height: 80vh;
+	max-width: 100vw;
 }
 
 .image-list .el-slider {
