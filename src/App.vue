@@ -25,15 +25,11 @@
 import { computed, ref } from "vue";
 import { getBaseId } from "./utils/query";
 import { joinRoot, joinDate } from "./utils/path";
-import {
-	getBlockAttrs,
-	defaultAlbumConfig,
-	getAlbumConf,
-} from "./utils/fetch";
+import { getBlockAttrs, defaultAlbumConfig, getAlbumConf } from "./utils/fetch";
 
 const index = ref(0);
 
-const id = getBaseId();
+let id = getBaseId();
 const albumFile = ref("");
 const albumConfig = ref(defaultAlbumConfig());
 const totalImages = computed(() => albumConfig.value?.images?.length ?? 0);
@@ -57,7 +53,28 @@ const formatTooltip = (val: number) => {
 	return "第 " + (val + 1) + " 张照片";
 };
 
+document.addEventListener("keyup", (e) => {
+	if (e.ctrlKey && e.key === "ArrowRight") {
+		nextImage();
+	} else if (e.ctrlKey && e.key === "ArrowLeft") {
+		prevImage();
+	}
+});
+
+function nextImage() {
+	if (index.value < totalImages.value - 1) {
+		index.value++;
+	}
+}
+
+function prevImage() {
+	if (index.value > 0) {
+		index.value--;
+	}
+}
+
 (async () => {
+	id = "20220918213216-l8bnoek";
 	if (id.length > 1) {
 		const { data } = await getBlockAttrs(id);
 		const file = data["custom-album-file"];
