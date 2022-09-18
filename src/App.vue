@@ -74,7 +74,6 @@ function prevImage() {
 }
 
 (async () => {
-	id = "20220918213216-l8bnoek";
 	if (id.length > 1) {
 		const { data } = await getBlockAttrs(id);
 		const file = data["custom-album-file"];
