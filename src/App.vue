@@ -5,10 +5,13 @@
 
 			<div class="date">{{ joinDate(albumConfig.date) }}</div>
 		</div>
-		<img
-			:src="joinRoot([albumConfig.root, currentFile.file])"
-			:alt="currentFile.caption"
-		/>
+		<div class="image-box">
+			<img
+				ref="imageDOM"
+				:src="joinRoot([albumConfig.root, currentFile.file])"
+				:alt="currentFile.caption"
+			/>
+		</div>
 		<el-slider
 			v-if="totalImages"
 			v-model="index"
@@ -17,6 +20,37 @@
 			:step="1"
 			:format-tooltip="formatTooltip"
 		/>
+		<div class="func-btn">
+			<el-button
+				circle
+				type="primary"
+				:icon="Back"
+				@click="prevImage"
+				:disabled="index == 0"
+			/>
+
+			<el-button
+				circle
+				type="primary"
+				:icon="albumIsPlay ? VideoPause : VideoPlay"
+				@click="albumIsPlay = !albumIsPlay"
+			/>
+
+			<el-button
+				circle
+				type="primary"
+				:icon="CopyDocument"
+				@click="copyImage"
+			/>
+
+			<el-button
+				circle
+				type="primary"
+				:icon="Right"
+				@click="nextImage"
+				:disabled="index == totalImages - 1"
+			/>
+		</div>
 		<p class="image-caption" v-html="currentFile.caption"></p>
 	</div>
 </template>
@@ -26,11 +60,22 @@ import { computed, ref } from "vue";
 import { getBaseId } from "./utils/query";
 import { joinRoot, joinDate } from "./utils/path";
 import { getBlockAttrs, defaultAlbumConfig, getAlbumConf } from "./utils/fetch";
+import { ElMessage } from "element-plus";
+//@ts-ignore
+import {
+	VideoPause,
+	VideoPlay,
+	Back,
+	Right,
+	CopyDocument,
+} from "@element-plus/icons-vue";
 
 const index = ref(0);
-
-let id = getBaseId();
+const id = getBaseId();
+const imageDOM = ref((null as any) as HTMLImageElement);
 const albumFile = ref("");
+const albumIsPlay = ref(false);
+const albumPlaySpeed = ref(2000);
 const albumConfig = ref(defaultAlbumConfig());
 const totalImages = computed(() => albumConfig.value?.images?.length ?? 0);
 const currentFile = computed(() => {
@@ -73,10 +118,36 @@ function prevImage() {
 	}
 }
 
+function copyImage() {
+	window.getSelection()!.removeAllRanges();
+	const range = document.createRange();
+	range.selectNode(imageDOM.value);
+	window.getSelection()!.addRange(range);
+	document.execCommand("Copy");
+	window.getSelection()!.removeAllRanges();
+	ElMessage.success(`成功复制第 ${index.value + 1} 张图片`);
+}
+
+window.setInterval(() => {
+	if (!albumIsPlay.value) {
+		return;
+	}
+	if (index.value < totalImages.value - 1) {
+		index.value++;
+	} else {
+		index.value = 0;
+	}
+}, albumPlaySpeed.value);
+
 (async () => {
 	if (id.length > 1) {
 		const { data } = await getBlockAttrs(id);
 		const file = data["custom-album-file"];
+		const speed = Number(data["custom-album-playspeed"]);
+
+		if (speed >= 100) {
+			albumPlaySpeed.value = speed;
+		}
 
 		if (file && file.endsWith(".json")) {
 			albumFile.value = file;
@@ -134,6 +205,15 @@ function prevImage() {
 
 .sy-album .el-slider {
 	width: 95%;
+}
+
+.sy-album .func-btn {
+	width: 100%;
+	display: flex;
+	margin-top: 8px;
+	margin-bottom: 20px;
+	flex-direction: row;
+	justify-content: space-around;
 }
 
 p.image-caption {
