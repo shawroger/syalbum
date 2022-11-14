@@ -50,17 +50,17 @@
 				circle
 				plain
 				type="primary"
-				:icon="Right"
-				@click="nextImage"
-				:disabled="index == totalImages - 1"
+				:icon="Comment"
+				@click="showComment"
 			/>
 
 			<el-button
 				circle
 				plain
 				type="primary"
-				:icon="Comment"
-				@click="showComment"
+				:icon="Right"
+				@click="nextImage"
+				:disabled="index == totalImages - 1"
 			/>
 		</div>
 
@@ -95,7 +95,7 @@
 		</div>
 		<p
 			class="image-caption"
-			v-html="currentFile.caption"
+			v-html="currentFile.caption || '暂无说明'"
 			v-if="!showCommentTable"
 		></p>
 	</div>
@@ -139,7 +139,7 @@ const currentFile = computed(() => {
 		const image = albumConfig.value.images[index.value];
 
 		if (image && !image.caption) {
-			image.caption = "暂无说明";
+			image.caption = "";
 		}
 		return image;
 	} else {
