@@ -23,6 +23,7 @@
 		<div class="func-btn">
 			<el-button
 				circle
+				plain
 				type="primary"
 				:icon="Back"
 				@click="prevImage"
@@ -31,6 +32,7 @@
 
 			<el-button
 				circle
+				plain
 				type="primary"
 				:icon="albumIsPlay ? VideoPause : VideoPlay"
 				@click="albumIsPlay = !albumIsPlay"
@@ -38,6 +40,7 @@
 
 			<el-button
 				circle
+				plain
 				type="primary"
 				:icon="CopyDocument"
 				@click="copyImage"
@@ -45,13 +48,56 @@
 
 			<el-button
 				circle
+				plain
 				type="primary"
 				:icon="Right"
 				@click="nextImage"
 				:disabled="index == totalImages - 1"
 			/>
+
+			<el-button
+				circle
+				plain
+				type="primary"
+				:icon="Comment"
+				@click="showComment"
+			/>
 		</div>
-		<p class="image-caption" v-html="currentFile.caption"></p>
+
+		<div class="comment-table" v-if="showCommentTable">
+			<el-table :data="commentList" style="width: 100%;" border>
+				<el-table-column
+					label="位置"
+					align="cneter"
+					width="100"
+					header-align="cneter"
+				>
+					<template #default="scope">
+						<el-button
+							link
+							type="primary"
+							@click="
+								index = scope.row.index;
+								showCommentTable = false;
+							"
+							style="display: flex; margin: auto;"
+							>第 {{ scope.row.index + 1 }} 张</el-button
+						>
+					</template>
+				</el-table-column>
+
+				<el-table-column label="说明" header-align="cneter" align="cneter">
+					<template #default="scope">
+						<span v-html="scope.row.caption"></span>
+					</template>
+				</el-table-column>
+			</el-table>
+		</div>
+		<p
+			class="image-caption"
+			v-html="currentFile.caption"
+			v-if="!showCommentTable"
+		></p>
 	</div>
 </template>
 
@@ -68,9 +114,19 @@ import {
 	Back,
 	Right,
 	CopyDocument,
+	Comment,
 } from "@element-plus/icons-vue";
 
 const index = ref(0);
+const showCommentTable = ref(false);
+const commentList = computed(() =>
+	albumConfig.value.images
+		.map((e, index) => ({
+			...e,
+			index,
+		}))
+		.filter((e) => e.caption !== undefined && e.caption?.length > 0)
+);
 const id = getBaseId();
 const imageDOM = ref((null as any) as HTMLImageElement);
 const albumFile = ref("");
@@ -107,12 +163,14 @@ document.addEventListener("keyup", (e) => {
 });
 
 function nextImage() {
+	showCommentTable.value = false;
 	if (index.value < totalImages.value - 1) {
 		index.value++;
 	}
 }
 
 function prevImage() {
+	showCommentTable.value = false;
 	if (index.value > 0) {
 		index.value--;
 	}
@@ -126,6 +184,10 @@ function copyImage() {
 	document.execCommand("Copy");
 	window.getSelection()!.removeAllRanges();
 	ElMessage.success(`成功复制第 ${index.value + 1} 张图片`);
+}
+
+function showComment() {
+	showCommentTable.value = !showCommentTable.value;
 }
 
 window.setInterval(() => {
@@ -207,6 +269,11 @@ window.setInterval(() => {
 	width: 95%;
 }
 
+.sy-album .comment-table {
+	width: 100%;
+	margin: 20px 0px;
+}
+
 .sy-album .func-btn {
 	width: 100%;
 	display: flex;
@@ -224,8 +291,17 @@ p.image-caption {
 	margin: 0;
 }
 
+.comment-table tr th div {
+	text-align: center;
+}
+
+.comment-table a,
 p.image-caption a {
 	color: orange;
 	text-decoration: none;
+}
+
+div.comment-table > div table tbody tr td.el-table__cell > div {
+	text-align: center;
 }
 </style>
